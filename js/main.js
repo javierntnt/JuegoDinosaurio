@@ -1,16 +1,18 @@
- // Reutilizar configuración de Firebase
- const firebaseConfig = {
-    apiKey: "AIzaSyAp1mfpOhYf7_hZJvkm5S3ZviFU8coAfjM",
-    authDomain: "javier-53961.firebaseapp.com",
-    projectId: "javier-53961",
-    storageBucket: "javier-53961.firebasestorage.app",
-    messagingSenderId: "873416995492",
-    appId: "1:873416995492:web:1f9eef8e37aee227c62c31"
-  };
+// Reutilizar configuración de Firebase
+const firebaseConfig = {
+// Nuevo firebaseConfig para guardar la puntuación del usuario
+    apiKey: "AIzaSyDZs4bcM6l4MjOiIjA1OqnyHmTyYhNGVMY",
+    authDomain: "dinosaurioxd-1dd5a.firebaseapp.com",
+    projectId: "dinosaurioxd-1dd5a",
+    storageBucket: "dinosaurioxd-1dd5a.firebasestorage.app",
+    messagingSenderId: "1093109909387",
+    appId: "1:1093109909387:web:7494254b8fc7387990518e"
+};
 
 // Inicializar Firebase
 const app = firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
 function startGame() {
     const playerName = document.getElementById('playerName').value;
     if (playerName) {
