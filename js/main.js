@@ -1,6 +1,8 @@
-// Reutilizar configuración de Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
+
 const firebaseConfig = {
-// Nuevo firebaseConfig para guardar la puntuación del usuario
+    // Nuevo firebaseConfig para guardar la puntuación del usuario
     apiKey: "AIzaSyDZs4bcM6l4MjOiIjA1OqnyHmTyYhNGVMY",
     authDomain: "dinosaurioxd-1dd5a.firebaseapp.com",
     projectId: "dinosaurioxd-1dd5a",
@@ -10,15 +12,15 @@ const firebaseConfig = {
 };
 
 // Inicializar Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 function startGame() {
     const playerName = document.getElementById('playerName').value;
     if (playerName) {
         // Guardar el nombre del jugador en la base de datos
-        const playerRef = db.ref('players/' + playerName);
-        playerRef.set({ score: 0 });
+        const playerRef = ref(db, 'players/' + playerName);
+        set(playerRef, { score: 0 });
 
         // Redirigir al archivo HTML del juego
         window.location.href = 'juego.html';
@@ -28,15 +30,16 @@ function startGame() {
 }
 
 const playerName = prompt("Ingresa tu nombre de nuevo para continuar:");
-const playerRef = db.ref('players/' + playerName);
+const playerRef = ref(db, 'players/' + playerName);
 
 function updateScore() {
-    playerRef.once('value').then(snapshot => {
-        let currentScore = snapshot.val().score || 0;
-        playerRef.update({ score: currentScore + 10 }); // Actualiza el puntaje
+    get(playerRef).then(snapshot => {
+        let currentScore = (snapshot.val() && snapshot.val().score) || 0;
+        update(playerRef, { score: currentScore + 10 });
         alert("Tu puntaje ahora es: " + (currentScore + 10));
     });
 }
+
 //****** GAME LOOP ********//
 
 var time = new Date();
@@ -139,10 +142,9 @@ function Saltar(){
 function MoverDinosaurio() {
     dinoPosY += velY * deltaTime;
     if(dinoPosY < sueloY){
-        
         TocarSuelo();
     }
-    dino.style.bottom = dinoPosY+"px";
+    dino.style.bottom = dinoPosY + "px";
 }
 
 function TocarSuelo() {
@@ -189,10 +191,10 @@ function CrearObstaculo() {
     obstaculo.classList.add("cactus");
     if(Math.random() > 0.5) obstaculo.classList.add("cactus2");
     obstaculo.posX = contenedor.clientWidth;
-    obstaculo.style.left = contenedor.clientWidth+"px";
+    obstaculo.style.left = contenedor.clientWidth + "px";
 
     obstaculos.push(obstaculo);
-    tiempoHastaObstaculo = tiempoObstaculoMin + Math.random() * (tiempoObstaculoMax-tiempoObstaculoMin) / gameVel;
+    tiempoHastaObstaculo = tiempoObstaculoMin + Math.random() * (tiempoObstaculoMax - tiempoObstaculoMin) / gameVel;
 }
 
 function CrearNube() {
@@ -200,11 +202,11 @@ function CrearNube() {
     contenedor.appendChild(nube);
     nube.classList.add("nube");
     nube.posX = contenedor.clientWidth;
-    nube.style.left = contenedor.clientWidth+"px";
-    nube.style.bottom = minNubeY + Math.random() * (maxNubeY-minNubeY)+"px";
+    nube.style.left = contenedor.clientWidth + "px";
+    nube.style.bottom = minNubeY + Math.random() * (maxNubeY - minNubeY) + "px";
     
     nubes.push(nube);
-    tiempoHastaNube = tiempoNubeMin + Math.random() * (tiempoNubeMax-tiempoNubeMin) / gameVel;
+    tiempoHastaNube = tiempoNubeMin + Math.random() * (tiempoNubeMax - tiempoNubeMin) / gameVel;
 }
 
 function MoverObstaculos() {
@@ -213,9 +215,9 @@ function MoverObstaculos() {
             obstaculos[i].parentNode.removeChild(obstaculos[i]);
             obstaculos.splice(i, 1);
             GanarPuntos();
-        }else{
+        } else {
             obstaculos[i].posX -= CalcularDesplazamiento();
-            obstaculos[i].style.left = obstaculos[i].posX+"px";
+            obstaculos[i].style.left = obstaculos[i].posX + "px";
         }
     }
 }
@@ -225,9 +227,9 @@ function MoverNubes() {
         if(nubes[i].posX < -nubes[i].clientWidth) {
             nubes[i].parentNode.removeChild(nubes[i]);
             nubes.splice(i, 1);
-        }else{
+        } else {
             nubes[i].posX -= CalcularDesplazamiento() * velNube;
-            nubes[i].style.left = nubes[i].posX+"px";
+            nubes[i].style.left = nubes[i].posX + "px";
         }
     }
 }
@@ -238,14 +240,14 @@ function GanarPuntos() {
     if(score == 5){
         gameVel = 1.5;
         contenedor.classList.add("mediodia");
-    }else if(score == 10) {
+    } else if(score == 10) {
         gameVel = 2;
         contenedor.classList.add("tarde");
     } else if(score == 20) {
         gameVel = 3;
         contenedor.classList.add("noche");
     }
-    suelo.style.animationDuration = (3/gameVel)+"s";
+    suelo.style.animationDuration = (3/gameVel) + "s";
 }
 
 function GameOver() {
@@ -256,9 +258,9 @@ function GameOver() {
 function DetectarColision() {
     for (var i = 0; i < obstaculos.length; i++) {
         if(obstaculos[i].posX > dinoPosX + dino.clientWidth) {
-            //EVADE
-            break; //al estar en orden, no puede chocar con más
-        }else{
+            // EVADE
+            break; // al estar en orden, no puede chocar con más
+        } else {
             if(IsCollision(dino, obstaculos[i], 10, 30, 15, 20)) {
                 GameOver();
             }
