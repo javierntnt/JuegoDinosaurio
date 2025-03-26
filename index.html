@@ -3,19 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Juego de Adivinar el Número</title>
-    <link rel="stylesheet" href="Estilos.css">
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
-    <script src="main.js"></script>
+    <title>Dino Game con Firebase</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Adivina el Número</h1>
-        <p>Estoy pensando en un número entre 1 y 1000. ¿Puedes adivinarlo?</p>
-        <input type="number" id="guess" placeholder="Escribe tu número aquí">
-        <button onclick="checkGuess()">Adivinar</button>
-        <p id="feedback"></p>
+    <h1>Juego del Dinosaurio 🦖</h1>
+
+    <input type="text" id="playerName" placeholder="Tu nombre">
+    <button id="startGameButton">Iniciar Juego</button>
+
+    <p>Puntaje:<span id="scoreDisplay">0</span></p>
+    <p>Mejor Puntaje: <span id="highScore">0</span> por <span id="bestPlayer">-</span></p>
+
+    <div id="game">
+        <div id="dino"></div>
+        <div id="cactus"></div>
     </div>
+
+    <button id="jumpButton">Saltar</button>
+
+    <script src="script.js" type="module"></script>
 </body>
 </html>
+
