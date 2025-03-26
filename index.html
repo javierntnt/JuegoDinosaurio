@@ -3,26 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro y Juego</title>
-    <link rel="stylesheet" href="">
+    <title>Juego de Adivinar el Número</title>
+    <link rel="stylesheet" href="Estilos.css">
 </head>
 <body>
-    <div class="register-container">
-        <h1>Registro de Usuario</h1>
-        <input type="text" id="username" placeholder="Nombre de usuario">
-        <button onclick="registerUser()">Registrar</button>
-        <p id="registrationFeedback"></p>
-    </div>
-
-    <div class="game-container" style="display: none;">
+    <div class="container">
         <h1>Adivina el Número</h1>
-        <p>Hola, <span id="displayUsername"></span>!</p>
-        <p>Estoy pensando en un número entre 1 y 100.</p>
+        <p>Estoy pensando en un número entre 1 y 1000. ¿Puedes adivinarlo?</p>
         <input type="number" id="guess" placeholder="Escribe tu número aquí">
         <button onclick="checkGuess()">Adivinar</button>
         <p id="feedback"></p>
     </div>
-
     <script src="main.js"></script>
 </body>
 </html>
