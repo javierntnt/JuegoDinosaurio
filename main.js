@@ -1,3 +1,19 @@
+
+// Función para solicitar el registro del nombre
+function registrarNombre() {
+    let nombre = prompt("Por favor, escribe tu nombre para registrarte:");
+
+    // Validación del nombre ingresado
+    if (nombre && nombre.trim() !== "") {
+        alert(`¡Bienvenido, ${nombre}! Gracias por registrarte.`);
+    } else {
+        alert("Debes ingresar un nombre válido para registrarte.");
+    }
+}
+
+// Llamar a la función al cargar o usarla con un botón
+registrarNombre();
+
 let randomNumber = Math.floor(Math.random() * 1000) + 1;
 
 function checkGuess() {
