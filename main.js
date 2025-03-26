@@ -1,5 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+import { getDatabase, ref, set, update } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
 // Configuración Firebase
 const firebaseConfig = {
     apiKey: "AIzaSyBwvvBsW6DCuIXMyz2bCffupVRXFdGZ6c0",
@@ -8,11 +9,11 @@ const firebaseConfig = {
     storageBucket: "dinosaurio-602da.firebasestorage.app",
     messagingSenderId: "582643715619",
     appId: "1:582643715619:web:6ebb4dc144fe53af462b96"
-  };
+};
 
-// Inicializa Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.database(app);
+// Inicializa Firebase y la Realtime Database
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
 let randomNumber = Math.floor(Math.random() * 100) + 1;
 let currentUsername = "";
@@ -31,8 +32,8 @@ function registerUser() {
     registrationFeedback.textContent = `¡Bienvenido, ${username}!`;
     document.getElementById("displayUsername").textContent = username;
 
-    // Guarda el usuario en Firebase
-    firebase.database().ref(`users/${username}`).set({
+    // Guarda el usuario en Firebase Realtime Database
+    set(ref(db, `users/${username}`), {
         username: username,
         status: "registrado"
     });
@@ -57,7 +58,7 @@ function checkGuess() {
         feedback.style.color = "green";
 
         // Actualiza el registro de Firebase como ganador
-        firebase.database().ref(`users/${currentUsername}`).update({
+        update(ref(db, `users/${currentUsername}`), {
             result: "ganador"
         });
 
@@ -71,7 +72,7 @@ function checkGuess() {
 
     if (userGuess !== randomNumber) {
         // Actualiza el registro de Firebase como perdedor
-        firebase.database().ref(`users/${currentUsername}`).update({
+        update(ref(db, `users/${currentUsername}`), {
             result: "perdedor"
         });
     }
