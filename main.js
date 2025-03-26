@@ -2,11 +2,10 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebas
 import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
 
 const firebaseConfig = {
-    // Nuevo firebaseConfig para guardar la puntuación del usuario
     apiKey: "AIzaSyDZs4bcM6l4MjOiIjA1OqnyHmTyYhNGVMY",
     authDomain: "dinosaurioxd-1dd5a.firebaseapp.com",
     projectId: "dinosaurioxd-1dd5a",
-    storageBucket: "dinosaurioxd-1dd5a.firebasestorage.app",
+    storageBucket: "dinosaurioxd-1dd5a.appspot.com", // Corregido el dominio del storage bucket
     messagingSenderId: "1093109909387",
     appId: "1:1093109909387:web:7494254b8fc7387990518e"
 };
@@ -15,6 +14,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Función para iniciar el juego
 function startGame() {
     const playerName = document.getElementById('playerName').value;
     if (playerName) {
@@ -29,16 +29,23 @@ function startGame() {
     }
 }
 
+// Recuperar el nombre del jugador
 const playerName = prompt("Ingresa tu nombre de nuevo para continuar:");
 const playerRef = ref(db, 'players/' + playerName);
 
+// Función para actualizar el puntaje
 function updateScore() {
     get(playerRef).then(snapshot => {
         let currentScore = (snapshot.val() && snapshot.val().score) || 0;
         update(playerRef, { score: currentScore + 10 });
         alert("Tu puntaje ahora es: " + (currentScore + 10));
+    }).catch(error => {
+        console.error("Error al actualizar el puntaje:", error);
     });
 }
+
+// Asegúrate de que las funciones estén disponibles globalmente
+window.updateScore = updateScore;
 
 //****** GAME LOOP ********//
 
