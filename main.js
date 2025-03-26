@@ -14,6 +14,28 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Función para probar la conexión a Firebase
+function testFirebase() {
+    const testRef = ref(db, 'testConnection');
+    // Se envía un valor de prueba
+    set(testRef, { mensaje: "Firebase conectado correctamente" })
+      .then(() => {
+          return get(testRef);
+      })
+      .then(snapshot => {
+          if (snapshot.exists()) {
+              console.log("Firebase está funcional:", snapshot.val());
+          } else {
+              console.error("No se encontraron datos en la referencia de prueba");
+          }
+      })
+      .catch(error => {
+          console.error("Error al probar Firebase:", error);
+      });
+}
+
+testFirebase();
+
 // Función para iniciar el juego
 function startGame() {
     const playerName = document.getElementById('playerName').value;
