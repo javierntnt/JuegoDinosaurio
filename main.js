@@ -1,310 +1,79 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-import { getDatabase, ref, set, update, get } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-database.js";
-
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+// Configuración Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyDZs4bcM6l4MjOiIjA1OqnyHmTyYhNGVMY",
-    authDomain: "dinosaurioxd-1dd5a.firebaseapp.com",
-    projectId: "dinosaurioxd-1dd5a",
-    storageBucket: "dinosaurioxd-1dd5a.appspot.com", // Corregido el dominio del storage bucket
-    messagingSenderId: "1093109909387",
-    appId: "1:1093109909387:web:7494254b8fc7387990518e"
-};
+    apiKey: "AIzaSyBwvvBsW6DCuIXMyz2bCffupVRXFdGZ6c0",
+    authDomain: "dinosaurio-602da.firebaseapp.com",
+    projectId: "dinosaurio-602da",
+    storageBucket: "dinosaurio-602da.firebasestorage.app",
+    messagingSenderId: "582643715619",
+    appId: "1:582643715619:web:6ebb4dc144fe53af462b96"
+  };
 
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+// Inicializa Firebase
+const app = firebase.initializeApp(firebaseConfig);
+const db = firebase.database(app);
 
-// Función para probar la conexión a Firebase
-function testFirebase() {
-    const testRef = ref(db, 'testConnection');
-    // Se envía un valor de prueba
-    set(testRef, { mensaje: "Firebase conectado correctamente" })
-      .then(() => {
-          return get(testRef);
-      })
-      .then(snapshot => {
-          if (snapshot.exists()) {
-              console.log("Firebase está funcional:", snapshot.val());
-          } else {
-              console.error("No se encontraron datos en la referencia de prueba");
-          }
-      })
-      .catch(error => {
-          console.error("Error al probar Firebase:", error);
-      });
-}
+let randomNumber = Math.floor(Math.random() * 100) + 1;
+let currentUsername = "";
 
-testFirebase();
+// Función para registrar al usuario
+function registerUser() {
+    const username = document.getElementById("username").value;
+    const registrationFeedback = document.getElementById("registrationFeedback");
 
-// Función para iniciar el juego
-function startGame() {
-    const playerName = document.getElementById('playerName').value;
-    if (playerName) {
-        // Guardar el nombre del jugador en la base de datos
-        const playerRef = ref(db, 'players/' + playerName);
-        set(playerRef, { score: 0 });
-
-        // Redirigir al archivo HTML del juego
-        window.location.href = 'juego.html';
-    } else {
-        alert("Por favor ingresa tu nombre");
+    if (username.trim() === "") {
+        registrationFeedback.textContent = "Por favor, escribe un nombre de usuario.";
+        return;
     }
-}
 
-// Recuperar el nombre del jugador
-const playerName = prompt("Ingresa tu nombre de nuevo para continuar:");
-const playerRef = ref(db, 'players/' + playerName);
+    currentUsername = username;
+    registrationFeedback.textContent = `¡Bienvenido, ${username}!`;
+    document.getElementById("displayUsername").textContent = username;
 
-// Función para actualizar el puntaje
-function updateScore() {
-    get(playerRef).then(snapshot => {
-        let currentScore = (snapshot.val() && snapshot.val().score) || 0;
-        update(playerRef, { score: currentScore + 10 });
-        alert("Tu puntaje ahora es: " + (currentScore + 10));
-    }).catch(error => {
-        console.error("Error al actualizar el puntaje:", error);
+    // Guarda el usuario en Firebase
+    firebase.database().ref(`users/${username}`).set({
+        username: username,
+        status: "registrado"
     });
+
+    // Muestra el juego
+    document.querySelector(".register-container").style.display = "none";
+    document.querySelector(".game-container").style.display = "block";
 }
 
-// Asegúrate de que las funciones estén disponibles globalmente
-window.updateScore = updateScore;
+// Función para verificar la respuesta del usuario
+function checkGuess() {
+    const userGuess = Number(document.getElementById("guess").value);
+    const feedback = document.getElementById("feedback");
 
-//****** GAME LOOP ********//
+    if (!userGuess || userGuess < 1 || userGuess > 100) {
+        feedback.textContent = "Por favor, introduce un número entre 1 y 100.";
+        return;
+    }
 
-var time = new Date();
-var deltaTime = 0;
+    if (userGuess === randomNumber) {
+        feedback.textContent = "¡Felicidades! Adivinaste el número.";
+        feedback.style.color = "green";
 
-if(document.readyState === "complete" || document.readyState === "interactive"){
-    setTimeout(Init, 1);
-}else{
-    document.addEventListener("DOMContentLoaded", Init); 
-}
+        // Actualiza el registro de Firebase como ganador
+        firebase.database().ref(`users/${currentUsername}`).update({
+            result: "ganador"
+        });
 
-function Init() {
-    time = new Date();
-    Start();
-    Loop();
-}
+    } else if (userGuess < randomNumber) {
+        feedback.textContent = "El número es más alto.";
+        feedback.style.color = "orange";
+    } else {
+        feedback.textContent = "El número es más bajo.";
+        feedback.style.color = "orange";
+    }
 
-function Loop() {
-    deltaTime = (new Date() - time) / 1000;
-    time = new Date();
-    Update();
-    requestAnimationFrame(Loop);
-}
-
-//****** GAME LOGIC ********//
-
-var sueloY = 22;
-var velY = 0;
-var impulso = 900;
-var gravedad = 2500;
-
-var dinoPosX = 42;
-var dinoPosY = sueloY; 
-
-var sueloX = 0;
-var velEscenario = 1280/3;
-var gameVel = 1;
-var score = 0;
-
-var parado = false;
-var saltando = false;
-
-var tiempoHastaObstaculo = 2;
-var tiempoObstaculoMin = 0.7;
-var tiempoObstaculoMax = 1.8;
-var obstaculoPosY = 16;
-var obstaculos = [];
-
-var tiempoHastaNube = 0.5;
-var tiempoNubeMin = 0.7;
-var tiempoNubeMax = 2.7;
-var maxNubeY = 270;
-var minNubeY = 100;
-var nubes = [];
-var velNube = 0.5;
-
-var contenedor;
-var dino;
-var textoScore;
-var suelo;
-var gameOver;
-
-function Start() {
-    gameOver = document.querySelector(".game-over");
-    suelo = document.querySelector(".suelo");
-    contenedor = document.querySelector(".contenedor");
-    textoScore = document.querySelector(".score");
-    dino = document.querySelector(".dino");
-    document.addEventListener("keydown", HandleKeyDown);
-}
-
-function Update() {
-    if(parado) return;
-    
-    MoverDinosaurio();
-    MoverSuelo();
-    DecidirCrearObstaculos();
-    DecidirCrearNubes();
-    MoverObstaculos();
-    MoverNubes();
-    DetectarColision();
-
-    velY -= gravedad * deltaTime;
-}
-
-function HandleKeyDown(ev){
-    if(ev.keyCode == 32){
-        Saltar();
+    if (userGuess !== randomNumber) {
+        // Actualiza el registro de Firebase como perdedor
+        firebase.database().ref(`users/${currentUsername}`).update({
+            result: "perdedor"
+        });
     }
 }
 
-function Saltar(){
-    if(dinoPosY === sueloY){
-        saltando = true;
-        velY = impulso;
-        dino.classList.remove("dino-corriendo");
-    }
-}
-
-function MoverDinosaurio() {
-    dinoPosY += velY * deltaTime;
-    if(dinoPosY < sueloY){
-        TocarSuelo();
-    }
-    dino.style.bottom = dinoPosY + "px";
-}
-
-function TocarSuelo() {
-    dinoPosY = sueloY;
-    velY = 0;
-    if(saltando){
-        dino.classList.add("dino-corriendo");
-    }
-    saltando = false;
-}
-
-function MoverSuelo() {
-    sueloX += CalcularDesplazamiento();
-    suelo.style.left = -(sueloX % contenedor.clientWidth) + "px";
-}
-
-function CalcularDesplazamiento() {
-    return velEscenario * deltaTime * gameVel;
-}
-
-function Estrellarse() {
-    dino.classList.remove("dino-corriendo");
-    dino.classList.add("dino-estrellado");
-    parado = true;
-}
-
-function DecidirCrearObstaculos() {
-    tiempoHastaObstaculo -= deltaTime;
-    if(tiempoHastaObstaculo <= 0) {
-        CrearObstaculo();
-    }
-}
-
-function DecidirCrearNubes() {
-    tiempoHastaNube -= deltaTime;
-    if(tiempoHastaNube <= 0) {
-        CrearNube();
-    }
-}
-
-function CrearObstaculo() {
-    var obstaculo = document.createElement("div");
-    contenedor.appendChild(obstaculo);
-    obstaculo.classList.add("cactus");
-    if(Math.random() > 0.5) obstaculo.classList.add("cactus2");
-    obstaculo.posX = contenedor.clientWidth;
-    obstaculo.style.left = contenedor.clientWidth + "px";
-
-    obstaculos.push(obstaculo);
-    tiempoHastaObstaculo = tiempoObstaculoMin + Math.random() * (tiempoObstaculoMax - tiempoObstaculoMin) / gameVel;
-}
-
-function CrearNube() {
-    var nube = document.createElement("div");
-    contenedor.appendChild(nube);
-    nube.classList.add("nube");
-    nube.posX = contenedor.clientWidth;
-    nube.style.left = contenedor.clientWidth + "px";
-    nube.style.bottom = minNubeY + Math.random() * (maxNubeY - minNubeY) + "px";
-    
-    nubes.push(nube);
-    tiempoHastaNube = tiempoNubeMin + Math.random() * (tiempoNubeMax - tiempoNubeMin) / gameVel;
-}
-
-function MoverObstaculos() {
-    for (var i = obstaculos.length - 1; i >= 0; i--) {
-        if(obstaculos[i].posX < -obstaculos[i].clientWidth) {
-            obstaculos[i].parentNode.removeChild(obstaculos[i]);
-            obstaculos.splice(i, 1);
-            GanarPuntos();
-        } else {
-            obstaculos[i].posX -= CalcularDesplazamiento();
-            obstaculos[i].style.left = obstaculos[i].posX + "px";
-        }
-    }
-}
-
-function MoverNubes() {
-    for (var i = nubes.length - 1; i >= 0; i--) {
-        if(nubes[i].posX < -nubes[i].clientWidth) {
-            nubes[i].parentNode.removeChild(nubes[i]);
-            nubes.splice(i, 1);
-        } else {
-            nubes[i].posX -= CalcularDesplazamiento() * velNube;
-            nubes[i].style.left = nubes[i].posX + "px";
-        }
-    }
-}
-
-function GanarPuntos() {
-    score++;
-    textoScore.innerText = score;
-    if(score == 5){
-        gameVel = 1.5;
-        contenedor.classList.add("mediodia");
-    } else if(score == 10) {
-        gameVel = 2;
-        contenedor.classList.add("tarde");
-    } else if(score == 20) {
-        gameVel = 3;
-        contenedor.classList.add("noche");
-    }
-    suelo.style.animationDuration = (3/gameVel) + "s";
-}
-
-function GameOver() {
-    Estrellarse();
-    gameOver.style.display = "block";
-}
-
-function DetectarColision() {
-    for (var i = 0; i < obstaculos.length; i++) {
-        if(obstaculos[i].posX > dinoPosX + dino.clientWidth) {
-            // EVADE
-            break; // al estar en orden, no puede chocar con más
-        } else {
-            if(IsCollision(dino, obstaculos[i], 10, 30, 15, 20)) {
-                GameOver();
-            }
-        }
-    }
-}
-
-function IsCollision(a, b, paddingTop, paddingRight, paddingBottom, paddingLeft) {
-    var aRect = a.getBoundingClientRect();
-    var bRect = b.getBoundingClientRect();
-
-    return !(
-        ((aRect.top + aRect.height - paddingBottom) < (bRect.top)) ||
-        (aRect.top + paddingTop > (bRect.top + bRect.height)) ||
-        ((aRect.left + aRect.width - paddingRight) < bRect.left) ||
-        (aRect.left + paddingLeft > (bRect.left + bRect.width))
-    );
-}
