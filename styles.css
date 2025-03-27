@@ -14,7 +14,7 @@ input, button {
     width: 600px;
     height: 200px;
     border: 2px solid black;
-    background-color: white;
+    background-color: rgb(184, 180, 180);
     margin: auto;
     overflow: hidden;
 }
@@ -35,6 +35,7 @@ input, button {
 #cactus {
     position: absolute;
     bottom: 0;
+    border-color: black;
     right: -20px;
     width: 20px;  /* Ancho del cactus */
     height: 25px;  /* Altura del cactus */
@@ -43,7 +44,7 @@ input, button {
 #cactus img {
     width: 100%;   /* La imagen ocupa el 100% del div */
     height: 100%;  /* La imagen ocupa el 100% del div */
-    object-fit: cover; /* Ajusta la imagen para que cubra el contenedor sin distorsionarse */
+    object-fit: contain; /* Ajusta la imagen para que cubra el contenedor sin distorsionarse */
 }
 
 
