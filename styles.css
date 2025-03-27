@@ -23,19 +23,29 @@ input, button {
     position: absolute;
     bottom: 0;
     left: 50px;
-    width: 40px;
-    height: 40px;
-    background-color: gray;
+    width: 30px;  /* Cambia el tamaño del contenedor */
+    height: 50px; /* Cambia el tamaño del contenedor */
+}
+
+#dino img {
+    width: 100%;   /* La imagen se ajusta al tamaño del contenedor */
+    height: 100%;  /* La imagen se ajusta al tamaño del contenedor */
 }
 
 #cactus {
     position: absolute;
     bottom: 0;
     right: -20px;
-    width: 20px;
-    height: 40px;
-    background-color: green;
+    width: 20px;  /* Ancho del cactus */
+    height: 25px;  /* Altura del cactus */
 }
+
+#cactus img {
+    width: 100%;   /* La imagen ocupa el 100% del div */
+    height: 100%;  /* La imagen ocupa el 100% del div */
+    object-fit: cover; /* Ajusta la imagen para que cubra el contenedor sin distorsionarse */
+}
+
 
 .jump {
     animation: jump 0.5s ease-out;
@@ -49,5 +59,8 @@ input, button {
 @keyframes move {
     from { right: -20px; }
     to { right: 600px; }
+}
+#cactus {
+    animation: moveCactus 3s linear infinite; /* Ajusta la velocidad aquí */
 }
 
